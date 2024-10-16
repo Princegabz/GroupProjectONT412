@@ -243,3 +243,31 @@ public class Library : ILibrary
         return _books;
     }
 }
+//Iterator Pattern
+//Iterator Base
+public interface IBookIterator 
+{
+    bool HasNext();
+    Book Next();
+}
+//Concrete Iterator
+public class BookIterator : IBookIterator
+{
+    private readonly List<Book> _books;
+    private int _position = 0;
+
+    public BookIterator(List<Book> books)
+    {
+        _books = books;
+    }
+
+    public bool HasNext()
+    {
+        return _position < _books.Count;
+    }
+
+    public Book Next()
+    {
+        return _books[_position++];
+    }
+}
