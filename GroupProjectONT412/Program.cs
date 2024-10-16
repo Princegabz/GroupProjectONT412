@@ -262,8 +262,6 @@ public class Library : ILibrary
     {
         return _books;
     }
-
-    // Method to create an iterator
     public IBookIterator CreateIterator()
     {
         return new BookIterator(_books);
