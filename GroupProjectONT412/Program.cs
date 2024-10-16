@@ -16,8 +16,12 @@ public class Program
         libraryProxy.AddBook(book2);
 
         Console.WriteLine("\nInitial Library Book Collection:\n");
-        foreach (var book in libraryProxy.GetBooks())
+        IBookIterator iterator = libraryProxy.CreateIterator();
+
+        // Iterate through the book collection using the iterator
+        while (iterator.HasNext())
         {
+            var book = iterator.Next();
             Console.WriteLine($"- {book.Title} (State: {book.CurrentState.GetType().Name})");
         }
 
@@ -30,8 +34,10 @@ public class Program
         libraryProxy.BorrowBook(book2, user2); // Should succeed
 
         Console.WriteLine("\nAfter Borrowing Books:");
-        foreach (var book in libraryProxy.GetBooks())
+        iterator = libraryProxy.CreateIterator();
+        while (iterator.HasNext())
         {
+            var book = iterator.Next();
             Console.WriteLine($"- {book.Title} (State: {book.CurrentState.GetType().Name})");
         }
 
@@ -40,17 +46,22 @@ public class Program
         book2.CurrentState.Return(book2);
 
         Console.WriteLine("\nAfter Returning Books:");
-        foreach (var book in libraryProxy.GetBooks())
+        iterator = libraryProxy.CreateIterator();
+        while (iterator.HasNext())
         {
+            var book = iterator.Next();
             Console.WriteLine($"- {book.Title} (State: {book.CurrentState.GetType().Name})");
         }
+
         // Reserve a book
         Console.WriteLine("\nReserving a Book:");
         book1.CurrentState.Reserve(book1, user1); // Reserve Regular Book 1
 
         Console.WriteLine("\nAfter Reserving the Book:");
-        foreach (var book in libraryProxy.GetBooks())
+        iterator = libraryProxy.CreateIterator();
+        while (iterator.HasNext())
         {
+            var book = iterator.Next();
             Console.WriteLine($"- {book.Title} (State: {book.CurrentState.GetType().Name})");
         }
 
@@ -62,8 +73,10 @@ public class Program
         book1.CurrentState.Return(book1);
 
         Console.WriteLine("\nAfter Returning the Reserved Book:");
-        foreach (var book in libraryProxy.GetBooks())
+        iterator = libraryProxy.CreateIterator();
+        while (iterator.HasNext())
         {
+            var book = iterator.Next();
             Console.WriteLine($"- {book.Title} (State: {book.CurrentState.GetType().Name})");
         }
 
@@ -188,6 +201,7 @@ public interface ILibrary
     void AddBook(Book book);
     void BorrowBook(Book book, User user);
     List<Book> GetBooks();
+    IBookIterator CreateIterator();
 }
 
 public class LibraryProxy : ILibrary
@@ -221,6 +235,12 @@ public class LibraryProxy : ILibrary
         EnsureRealLibraryCreated();
         return _realLibrary.GetBooks();
     }
+
+    public IBookIterator CreateIterator()
+    {
+        EnsureRealLibraryCreated();
+        return _realLibrary.CreateIterator();
+    }
 }
 
 // Library Class (RealSubject)
@@ -242,15 +262,24 @@ public class Library : ILibrary
     {
         return _books;
     }
+
+    // Method to create an iterator
+    public IBookIterator CreateIterator()
+    {
+        return new BookIterator(_books);
+    }
 }
-//Iterator Pattern
-//Iterator Base
-public interface IBookIterator 
+
+// Iterator Pattern
+
+// Iterator Base
+public interface IBookIterator
 {
     bool HasNext();
     Book Next();
 }
-//Concrete Iterator
+
+// Concrete Iterator
 public class BookIterator : IBookIterator
 {
     private readonly List<Book> _books;
